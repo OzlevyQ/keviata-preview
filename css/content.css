@@ -101,4 +101,12 @@
   :root:not([data-theme=light]) .slide [style*="border: 1px solid #"]{border-color:var(--line-strong)!important}
   :root:not([data-theme=light]) .slide [style*="color:#"]:not(.corpus):not(.bar){color:var(--ink)!important}
 }
+/* contributor edition cards: card image + source line (scoped so pipeline .figure stays untouched) */
+.slide-inner>img{display:block;width:100%;max-height:46vh;object-fit:cover;border-radius:var(--r-md);
+  box-shadow:var(--shadow-1);margin:var(--s-3) 0}
+.slide .source{align-self:flex-start;display:inline-flex;align-items:baseline;gap:6px;margin-top:var(--s-2);
+  padding:7px 15px;border-radius:var(--r-pill);background:var(--gold-soft);color:var(--gold);
+  font-family:var(--font-sans);font-size:.95rem;font-weight:600;line-height:1.5}
+.slide .source::before{content:"מקור:";font-weight:700;opacity:.8}
+
 @media (prefers-reduced-motion:reduce){.arr{animation:none}}

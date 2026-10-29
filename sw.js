@@ -1,5 +1,5 @@
 /* Keviata service worker. Only ever touches caches named keviata-*. */
-const VERSION='redesign-type-4'
+const VERSION='redesign-contrib-1'
 const CACHE='keviata-shell-'+VERSION
 const RUNTIME='keviata-runtime'
 const SHELL=['./','index.html','offline.html','privacy.html','manifest.webmanifest','favicon.svg',

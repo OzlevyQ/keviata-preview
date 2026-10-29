@@ -383,15 +383,41 @@ async function adminCall(action,body={}){
 }
 async function loadReviews(){
  for(const [kind,title] of [['requests','בקשות כותבים'],['submissions','תכנים לאישור']]){
- let section=document.getElementById(kind);if(!section){section=node('section',{id:kind,class:'card'});$('dashRoot').append(section)}clear(section);section.append(node('h2',{text:title}));
- const data=await adminCall(kind,{status:kind==='requests'?'pending':'submitted'});
- if(!data[kind]?.length)section.append(node('p',{class:'muted',text:kind==='requests'?'אין בקשות כתיבה ממתינות.':'אין תכנים שממתינים לאישור.'}));
- for(const row of data[kind]){
- const article=node('article',{class:'card'});article.append(node('h3',{text:row.title||row.email}),node('p',{text:row.email}),node('p',{text:row.message||row.description}));
- for(const card of row.cards||[]){article.append(node('h4',{text:card.title}),node('p',{text:card.body}),node('p',{text:card.source}));if(card.image_url)article.append(node('img',{src:card.image_url,alt:card.title,style:'max-width:100%'}))}
- const note=node('textarea',{'aria-label':'הערת בדיקה',maxlength:'1000'}),feedback=node('p',{'role':'status'});article.append(note,feedback);
- for(const [decision,label] of [[kind==='requests'?'approve':'publish','אישור'],['reject','דחייה']]){
- const button=node('button',{type:'button',class:'btn',text:label});button.onclick=async()=>{button.disabled=true;const action=kind==='requests'?'review_request':'review_submission';try{try{await adminCall(action,{id:row.id,decision,note:note.value})}catch(e){if(e.status===409&&e.message==='date_taken'&&confirm('כבר קיימת מהדורה בתאריך הזה. להחליף אותה?'))await adminCall(action,{id:row.id,decision,note:note.value,overwrite:true});else throw e}await loadAll()}catch{feedback.textContent='הפעולה נכשלה. נסו שוב.'}finally{button.disabled=false}};article.append(button)}section.append(article)
+ let section=document.getElementById(kind);if(!section){section=node('section',{id:kind,class:'card rv-queue'});$('dashRoot').append(section)}
+ clear(section)
+ const data=await adminCall(kind,{status:kind==='requests'?'pending':'submitted'})
+ const rows=data[kind]||[]
+ section.append(node('div',{class:'rv-head'},[node('h2',{text:title}),node('span',{class:'rv-count',text:String(rows.length)})]))
+ if(!rows.length){section.append(node('p',{class:'muted rv-empty',text:kind==='requests'?'אין בקשות כתיבה ממתינות.':'אין תכנים שממתינים לאישור.'}));continue}
+ for(const row of rows){
+ const art=node('article',{class:'rv-card'})
+ if(kind==='requests'){
+ const init=((row.email||'?').trim()[0]||'?').toUpperCase()
+ art.append(node('div',{class:'rv-who'},[node('span',{class:'rv-avatar','aria-hidden':'true',text:init}),node('div',{class:'rv-who-txt'},[node('span',{class:'rv-email',text:row.email||''}),node('span',{class:'rv-date',text:'נשלחה '+fmtDate(row.created_at)})])]))
+ if(row.message)art.append(node('blockquote',{class:'rv-quote',text:row.message}))
+ }else{
+ const top=node('div',{class:'rv-sub-top'},[node('h3',{class:'rv-title',text:row.title||'ללא כותרת'})])
+ if(row.content_date)top.append(pill('לפרסום '+fmtDate(row.content_date),'warn'))
+ art.append(top)
+ if(row.email)art.append(node('p',{class:'rv-email',text:row.email}))
+ if(row.description)art.append(node('p',{class:'rv-desc',text:row.description}))
+ const wrap=node('div',{class:'rv-cards'})
+ ;(row.cards||[]).forEach((card,i)=>{const c=node('div',{class:'rv-mini'});c.append(node('div',{class:'rv-mini-head'},[node('span',{class:'rv-badge',text:String(i+1)}),node('h4',{text:card.title||''})]));if(card.body)c.append(node('p',{class:'rv-body',text:card.body}));if(card.image_url)c.append(node('img',{class:'rv-img',src:card.image_url,alt:card.title||''}));if(card.source)c.append(node('span',{class:'rv-source',text:card.source}));wrap.append(c)})
+ if(wrap.childElementCount)art.append(wrap)
+ }
+ const noteId='note-'+kind+'-'+row.id
+ const note=node('textarea',{id:noteId,class:'rv-note',maxlength:'1000'})
+ art.append(node('div',{class:'rv-field'},[node('label',{for:noteId,class:'rv-note-label',text:kind==='requests'?'הערה למבקש (לא חובה)':'הערה לכותב (לא חובה)'}),note]))
+ const feedback=node('p',{class:'rv-feedback','role':'status'})
+ const actions=node('div',{class:'rv-actions'})
+ const defs=kind==='requests'?[['approve','אישור','primary'],['reject','דחייה','reject']]:[['publish','אישור ופרסום','primary'],['reject','החזרה לכותב','reject']]
+ for(const [decision,label,variant] of defs){
+ const button=node('button',{type:'button',class:'btn'+(variant==='primary'?' primary':' rv-reject'),text:label})
+ button.onclick=async()=>{button.disabled=true;feedback.textContent='';const action=kind==='requests'?'review_request':'review_submission';try{try{await adminCall(action,{id:row.id,decision,note:note.value})}catch(e){if(e.status===409&&e.message==='date_taken'&&confirm('כבר קיימת מהדורה בתאריך הזה. להחליף אותה?'))await adminCall(action,{id:row.id,decision,note:note.value,overwrite:true});else throw e}await loadAll()}catch{feedback.textContent='הפעולה נכשלה. נסו שוב.';button.disabled=false}}
+ actions.append(button)
+ }
+ art.append(actions,feedback)
+ section.append(art)
  }
  }
 }

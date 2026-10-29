@@ -404,11 +404,44 @@ async function renderContributor(user,force){
  const key=user?.id||'';if(!force&&section.dataset.uid===key&&section.dataset.ready==='1')return
  const generation=++contributorGeneration
  section.dataset.uid=key;section.dataset.ready='';section.replaceChildren();if(!user)return
- const title=document.createElement('h2');title.id='contribTitle';title.textContent='כותבים בקביעותא';section.append(title)
+ const mk=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n}
+ const fmtDate=iso=>{try{return new Intl.DateTimeFormat('he-IL',{day:'numeric',month:'long',year:'numeric'}).format(new Date(iso))}catch{return ''}}
+ const pillRow=pill=>{const row=mk('p','contrib-pill-row');row.append(pill);return row}
+ const head=(eyebrow,titleText)=>{section.append(mk('p','eyebrow',eyebrow));const t=mk('h2',null,titleText);t.id='contribTitle';section.append(t)}
  try{const sb=await getSB();const {data:p,error}=await sb.from('profiles').select('role,is_admin').eq('id',user.id).maybeSingle();if(error)throw error;if(generation!==contributorGeneration)return
- if(p&&(p.is_admin||p.role==='contributor')){const link=document.createElement('a');link.href='contribute/';link.className='btn primary';link.textContent='לכתיבת מהדורה';const hint=document.createElement('p');hint.className='muted';hint.textContent='יש לכם הרשאת כתיבה. מהדורות שתשלחו יפורסמו אחרי אישור העורכים.';section.append(hint,link);section.dataset.ready='1';return}
+ /* approved writer / admin */
+ if(p&&(p.is_admin||p.role==='contributor')){
+  head('כתיבה בקביעותא','יש לכם הרשאת כתיבה')
+  section.append(pillRow(mk('span','pill ok','כותב/ת מאושר/ת')))
+  section.append(mk('p','contrib-intro','מהדורות שתכתבו יעברו בדיקה קצרה של העורכים, ואז יתפרסמו לכל הקהל.'))
+  const link=mk('a','btn primary contrib-btn','לסביבת הכתיבה');link.href='contribute/';section.append(link)
+  section.dataset.ready='1';return}
  const {data:requests,error:requestError}=await sb.from('contributor_requests').select('*').order('created_at',{ascending:false});if(requestError)throw requestError;if(generation!==contributorGeneration)return
- const latest=requests?.[0];if(latest){const status=document.createElement('p');status.className='contrib-status';status.textContent=latest.status==='pending'?'הבקשה ממתינה לאישור':(latest.review_note||'הבקשה נדחתה. אפשר לשלוח בקשה חדשה.');section.append(status);if(latest.status==='pending')return}
- const form=document.createElement('form'),message=document.createElement('textarea'),button=document.createElement('button'),feedback=document.createElement('p');const intro=document.createElement('p');intro.className='muted';intro.textContent='רוצים לכתוב מהדורות? ספרו לנו בקצרה מי אתם ומה תרצו לכתוב, ונחזור אליכם.';message.maxLength=1000;message.required=true;message.rows=3;message.placeholder='למה תרצו לכתוב בקביעותא?';message.setAttribute('aria-label','למה תרצו לכתוב בקביעותא?');button.type='submit';button.className='btn primary';button.textContent='שליחת בקשת כתיבה';feedback.setAttribute('role','status');form.className='contrib-form';form.append(message,button,feedback);section.append(intro);section.append(form);section.dataset.ready='1';form.onsubmit=async e=>{e.preventDefault();button.disabled=true;feedback.textContent='שולחים…';let error;try{({error}=await sb.from('contributor_requests').insert({message:message.value.trim()}))}catch(err){error=err}if(error){feedback.textContent='שליחת הבקשה נכשלה. נסו שוב.';button.disabled=false}else renderContributor(user,true)}
- }catch{const message=document.createElement('p');message.textContent='לא הצלחנו לטעון את בקשות הכתיבה';section.append(message)}
+ const latest=requests?.[0]
+ /* pending request */
+ if(latest&&latest.status==='pending'){
+  head('כתיבה בקביעותא','הבקשה שלכם בבדיקה')
+  section.append(pillRow(mk('span','pill warn','בבדיקה')))
+  const d=fmtDate(latest.created_at)
+  section.append(mk('p','contrib-intro',(d?'הבקשה נשלחה ב'+d+'. ':'')+'העורכים יעברו עליה, והסטטוס יתעדכן כאן.'))
+  const steps=mk('ol','contrib-steps');['נשלחה','בבדיקה','אישור'].forEach((l,i)=>{const li=mk('li','contrib-step'+(i<1?' done':i===1?' current':''));li.append(mk('span','contrib-step-dot'),mk('span','contrib-step-label',l));steps.append(li)});section.append(steps)
+  section.dataset.ready='1';return}
+ /* reader with no request, or a rejected request: show the form */
+ head('כתיבה בקביעותא','רוצים לכתוב בקביעותא?')
+ if(latest&&latest.status!=='pending'){
+  section.append(pillRow(mk('span','pill bad','לא אושרה')))
+  if(latest.review_note){const box=mk('div','contrib-quote');box.append(mk('span','contrib-quote-label','הערת העורכים'),mk('p',null,latest.review_note));section.append(box)}
+  section.append(mk('p','contrib-intro','אפשר לשלוח בקשה חדשה בכל עת.'))
+ }else section.append(mk('p','contrib-intro','כתבו מהדורה יומית קצרה של כרטיסים. ספרו לנו בכמה מילים מי אתם ומה תרצו לכתוב.'))
+ const ul=mk('ul','contrib-benefits');['כל מהדורה היא כמה כרטיסים קצרים: כותרת, תוכן ומקור','העורכים עוברים על כל מהדורה לפני הפרסום','כותבים בעורך פשוט, בלי צורך בידע טכני'].forEach(b=>ul.append(mk('li',null,b)));section.append(ul)
+ const form=mk('form','contrib-form')
+ const label=mk('label','contrib-label','ספרו לנו עליכם');label.setAttribute('for','contribMsg')
+ const message=mk('textarea');message.id='contribMsg';message.maxLength=1000;message.required=true;message.rows=4;message.placeholder='למשל: מה תרצו לכתוב, ועל אילו נושאים?'
+ const counter=mk('p','contrib-counter','0 / 1000')
+ const button=mk('button','btn primary contrib-btn','שליחת בקשה');button.type='submit'
+ const feedback=mk('p','contrib-feedback');feedback.setAttribute('role','status')
+ message.addEventListener('input',()=>{counter.textContent=message.value.length+' / 1000'})
+ form.append(label,message,counter,button,feedback);section.append(form);section.dataset.ready='1'
+ form.onsubmit=async e=>{e.preventDefault();button.disabled=true;feedback.className='contrib-feedback';feedback.textContent='שולחים…';let error;try{({error}=await sb.from('contributor_requests').insert({message:message.value.trim()}))}catch(err){error=err}if(error){feedback.className='contrib-feedback bad';feedback.textContent='שליחת הבקשה נכשלה. נסו שוב.';button.disabled=false}else renderContributor(user,true)}
+ }catch{section.replaceChildren();section.append(mk('p','contrib-intro','לא הצלחנו לטעון את פרטי הכתיבה. נסו שוב.'))}
 }
