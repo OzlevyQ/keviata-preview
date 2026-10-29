@@ -1,0 +1,23 @@
+{
+  "name": "קביעותא",
+  "short_name": "קביעותא",
+  "description": "שאלה אחת מהעתיד, תשובה מהמקורות, כל יום. סיפור AI וטכנולוגיה אחד ביום, דרך תורה, משנה, תלמוד ורש״י.",
+  "lang": "he",
+  "dir": "rtl",
+  "id": "./",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07110d",
+  "theme_color": "#07110d",
+  "categories": ["education", "books"],
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "המהדורה של היום", "url": "./#/today"},
+    {"name": "ארכיון", "url": "./#/archive"}
+  ]
+}

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://tbapyjqcsyoordncilte.supabase.co wss://tbapyjqcsyoordncilte.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="robots" content="noindex">
+<title>התחברות · קביעותא</title>
+<meta name="theme-color" content="#07110d">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../fonts/assistant-hebrew-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/frank-ruhl-libre-hebrew-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<script src="../js/theme.js"></script>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="login.css">
+</head>
+<body>
+<main class="login">
+  <section class="brand-panel" aria-hidden="true">
+    <div class="bp-grid"></div><div class="bp-page"></div>
+    <div class="bp-inner">
+      <a class="bp-brand" href="../" tabindex="-1"><span class="mark">ק</span><span class="wordmark">קביעותא</span></a>
+      <p class="bp-slogan"><span>שאלה אחת מהעתיד,</span><span>תשובה <em>מהמקורות</em>,</span><span class="l3">כל יום.</span></p>
+      <ul class="bp-points"><li>רצף לימוד שנשמר בכל מכשיר</li><li>שמורים, היסטוריה והעדפות</li><li>התראה כשיוצאת מהדורה חדשה</li></ul>
+    </div>
+  </section>
+  <section class="login-card" aria-labelledby="loginTitle">
+    <a class="back" href="../" id="backLink">חזרה לקריאה</a>
+    <div class="lc-inner">
+      <span class="mark lc-mark" aria-hidden="true">ק</span>
+      <h1 id="loginTitle">התחברות לקביעותא</h1>
+      <p class="muted">הקריאה פתוחה לכולם. התחברות שומרת את הרצף, השמורים וההעדפות שלך בכל המכשירים.</p>
+
+      <div id="stepMain">
+        <div id="emailBlock">
+          <form id="emailForm" novalidate>
+            <div class="field"><label for="email">כתובת מייל</label><input id="email" class="input" type="email" inputmode="email" autocomplete="email" dir="ltr" required placeholder="name@example.com"></div>
+            <button type="submit" class="btn ghost block" id="emailBtn">שלחו לי קוד</button>
+          </form>
+        </div>
+      </div>
+
+      <form id="stepCode" hidden novalidate>
+        <p>שלחנו קוד בן 6 ספרות אל <b id="sentTo" dir="ltr"></b></p>
+        <div class="field"><label for="code">קוד אימות</label><input id="code" class="input code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" dir="ltr" required></div>
+        <button type="submit" class="btn primary block" id="codeBtn">כניסה</button>
+        <button type="button" class="btn ghost block" id="resendCode" disabled>שליחה חוזרת בעוד 60 שניות</button>
+        <button type="button" class="btn ghost block" id="changeEmail">שינוי כתובת</button>
+      </form>
+
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+      <p class="fine">בהתחברות את/ה מאשר/ת את <a href="../privacy.html">מדיניות הפרטיות</a>. אנחנו לא שולחים מיילים שיווקיים בלי הסכמה.</p>
+    </div>
+  </section>
+</main>
+<script type="module" src="login.js"></script>
+</body>
+</html>

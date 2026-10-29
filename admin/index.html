@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://tbapyjqcsyoordncilte.supabase.co wss://tbapyjqcsyoordncilte.supabase.co; object-src 'none'; base-uri 'none'; form-action 'self'">
+<title>ניהול · קביעותא</title>
+<link rel="icon" href="../favicon.svg">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<script src="../js/theme.js"></script>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<a class="skip-link" href="#main">דילוג לתוכן</a>
+
+<!-- Dashboard -->
+<div id="dashRoot">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="mark" aria-hidden="true">ק</span>
+        <span class="wordmark">קביעותא</span>
+        <span class="pill brand-pill">ניהול</span>
+      </div>
+      <div class="topbar-actions">
+        <span class="updated" id="lastUpdated"></span>
+        <button type="button" class="icon-btn refresh" id="refreshBtn" aria-label="רענון נתונים" title="רענון">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 21v-5h5"/></svg>
+        </button>
+        <a class="btn ghost sm app-link" href="../">לאפליקציה</a>
+        <button type="button" class="btn ghost sm" id="logoutBtn">התנתקות</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sectionnav" aria-label="ניווט בין מקטעים">
+      <div class="nav-scroll">
+        <a class="chip" href="#overview">סקירה</a>
+        <a class="chip" href="#system">מערכת</a>
+        <a class="chip" href="#editions">מהדורות</a>
+        <a class="chip" href="#users">משתמשים</a>
+        <a class="chip" href="#subscribers">מנויים</a>
+      </div>
+    </nav>
+
+    <main id="main" class="content">
+      <p class="sr-only" id="loadStatus" role="status" aria-live="polite">טוען נתונים</p>
+
+      <!-- סקירה -->
+      <section id="overview" class="block" aria-labelledby="overviewH" aria-busy="true">
+        <div class="block-head">
+          <p class="eyebrow">סקירה</p>
+          <h2 id="overviewH">מבט על</h2>
+        </div>
+        <div class="kpi-grid">
+          <article class="card kpi">
+            <span class="kpi-num" id="kpiUsers"><span class="skel skel-num"></span></span>
+            <span class="kpi-label">משתמשים רשומים</span>
+          </article>
+          <article class="card kpi">
+            <span class="kpi-num" id="kpiActive"><span class="skel skel-num"></span></span>
+            <span class="kpi-label">פעילים ב-7 ימים <span class="pill kpi-pill" id="kpiActivePill" hidden></span></span>
+          </article>
+          <article class="card kpi">
+            <span class="kpi-num" id="kpiCompleted"><span class="skel skel-num"></span></span>
+            <span class="kpi-label">מהדורות שהושלמו</span>
+          </article>
+          <article class="card kpi">
+            <span class="kpi-num" id="kpiEmail"><span class="skel skel-num"></span></span>
+            <span class="kpi-label">מנויי מייל</span>
+          </article>
+        </div>
+      </section>
+
+      <!-- מערכת -->
+      <section id="system" class="block" aria-labelledby="systemH" aria-busy="true">
+        <div class="block-head">
+          <p class="eyebrow">מערכת</p>
+          <h2 id="systemH">מצב מערכת</h2>
+          <span class="pill health" id="healthBadge" hidden></span>
+        </div>
+        <div class="card sysrows" id="systemRows"></div>
+      </section>
+
+      <!-- מהדורות -->
+      <section id="editions" class="block" aria-labelledby="editionsH" aria-busy="true">
+        <div class="block-head">
+          <p class="eyebrow">מהדורות</p>
+          <h2 id="editionsH">מהדורות אחרונות</h2>
+        </div>
+        <div class="card tablecard">
+          <div class="tablewrap">
+            <table class="data editions">
+              <caption class="sr-only">רשימת המהדורות האחרונות עם נתוני לומדים ושיעור השלמה</caption>
+              <thead>
+                <tr>
+                  <th scope="col">תאריך</th>
+                  <th scope="col">כותרת</th>
+                  <th scope="col">תאריך עברי</th>
+                  <th scope="col">כרטיסים</th>
+                  <th scope="col">התחילו</th>
+                  <th scope="col">השלימו</th>
+                  <th scope="col">שיעור השלמה</th>
+                </tr>
+              </thead>
+              <tbody id="edRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- משתמשים -->
+      <section id="users" class="block" aria-labelledby="usersH" aria-busy="true">
+        <div class="block-head">
+          <p class="eyebrow">משתמשים</p>
+          <h2 id="usersH">משתמשים רשומים</h2>
+          <span class="count" id="usersTotal"></span>
+        </div>
+        <div class="card tablecard">
+          <div class="searchbar">
+            <div class="field search-field">
+              <label for="userSearch">חיפוש לפי שם או מייל</label>
+              <input class="input" id="userSearch" type="search" autocomplete="off" placeholder="שם או כתובת מייל">
+            </div>
+          </div>
+          <div class="tablewrap">
+            <table class="data users">
+              <caption class="sr-only">רשימת המשתמשים הרשומים, פעילות והסכמות</caption>
+              <thead>
+                <tr>
+                  <th scope="col">משתמש</th>
+                  <th scope="col">הצטרפות</th>
+                  <th scope="col">פעילות אחרונה</th>
+                  <th scope="col">מהדורות</th>
+                  <th scope="col">הסכמות</th>
+                </tr>
+              </thead>
+              <tbody id="userRows"></tbody>
+            </table>
+          </div>
+          <div class="pager">
+            <button type="button" class="btn ghost sm" id="prevPage">הקודם</button>
+            <span class="pageinfo" id="pageInfo"></span>
+            <button type="button" class="btn ghost sm" id="nextPage">הבא</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- מנויים -->
+      <section id="subscribers" class="block" aria-labelledby="subsH" aria-busy="true">
+        <div class="block-head">
+          <p class="eyebrow">מנויים</p>
+          <h2 id="subsH">מנויים והתראות</h2>
+        </div>
+        <div class="tile-grid" id="subTiles"></div>
+        <div class="card chartcard">
+          <h3 class="chart-title">השוואת מנויים</h3>
+          <div class="barchart" id="subChart"></div>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <span id="buildId"></span>
+      </footer>
+    </main>
+  </div>
+</div>
+
+<!-- Gate -->
+<div id="gateRoot" class="gate" hidden>
+  <div class="card gate-card">
+    <span class="gate-icon" id="gateIcon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+    </span>
+    <h1 class="gate-title" id="gateTitle"></h1>
+    <p class="gate-msg" id="gateMsg"></p>
+    <div class="gate-btns" id="gateBtns"></div>
+    <p class="gate-err" id="gateErr" role="alert"></p>
+  </div>
+</div>
+
+<script type="module" src="admin.js"></script>
+</body>
+</html>
